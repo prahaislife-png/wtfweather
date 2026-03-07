@@ -219,6 +219,28 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
 /* AI NARRATIVE BOX */
 .cc-narrative{padding:0 16px 14px}
+/* AI chips row */
+.ai-chips{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 12px}
+.ai-chip{display:flex;align-items:center;gap:5px;background:none;border:1.5px solid var(--purple-br);border-radius:100px;padding:5px 13px;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;color:var(--purple);cursor:pointer;transition:all .13s;white-space:nowrap}
+.ai-chip:hover{background:var(--purple-bg)}.ai-chip:disabled{opacity:.5;cursor:wait}
+.ai-chip.loaded{background:var(--purple-bg);border-color:var(--purple)}
+/* AI panel that appears below chips */
+.ai-panel{margin:0 16px 14px;background:var(--purple-bg);border:1.5px solid var(--purple-br);border-radius:14px;overflow:hidden;display:none}
+.ai-panel.on{display:block}
+.ai-panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid var(--purple-br)}
+.ai-panel-title{font-size:.6rem;font-weight:700;color:var(--purple);letter-spacing:.12em;text-transform:uppercase}
+.ai-panel-close{background:none;border:none;font-size:.9rem;color:var(--light);cursor:pointer;padding:0;line-height:1}
+.ai-panel-body{padding:12px 14px;font-size:.76rem;font-weight:500;color:var(--text);line-height:1.65}
+.ai-panel-body .ai-sentence{padding:5px 0;border-bottom:1px solid var(--purple-br)}
+.ai-panel-body .ai-sentence:first-child{padding-top:0}
+.ai-panel-body .ai-sentence:last-child{border-bottom:none;padding-bottom:0}
+.ai-panel-body .ai-line{padding:6px 0;border-bottom:1px solid var(--purple-br)}
+.ai-panel-body .ai-line:first-child{padding-top:0}
+.ai-panel-body .ai-line:last-child{border-bottom:none;padding-bottom:0}
+/* Compare verdict AI */
+.cmp-ai{background:var(--purple-bg);border:1.5px solid var(--purple-br);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.cmp-ai-lbl{font-size:.58rem;font-weight:700;color:var(--purple);letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.cmp-ai-body{font-size:.78rem;font-weight:500;color:var(--text);line-height:1.65}
 .ai-box{background:var(--purple-bg);border:1.5px solid var(--purple-br);border-radius:12px;padding:13px}
 .ai-box-lbl{font-size:.58rem;font-weight:700;color:var(--purple);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .ai-box-txt{font-size:.76rem;font-weight:500;color:var(--text);line-height:1.6}
@@ -422,6 +444,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <div class="v-ic" id="vIc">🌤</div>
       <div class="v-cp"><div class="v-title" id="vTi"></div><div class="v-sub" id="vSu"></div></div>
       <div class="v-win" id="vWi"></div>
+    </div>
+    <!-- AI compare verdict -->
+    <div class="cmp-ai" id="cmpAiEl" style="display:none">
+      <div class="cmp-ai-lbl">\u2736 AI Comparison Analysis</div>
+      <div class="cmp-ai-body" id="cmpAiBody"><div class="ai-loading"><div class="ai-spinner"></div>Generating AI comparison\u2026</div></div>
     </div>
     <div class="cg" id="cg">
       <div class="cc" id="c0"></div>
@@ -728,6 +755,19 @@ function buildCard(d, cardId) {
       '<div class="ai-box-lbl">\u2736 AI Analysis</div>'+
       '<div class="ai-loading"><div class="ai-spinner"></div>Generating\u2026</div>'+
     '</div></div>'+
+    '<div class="ai-chips">'+
+      '<button class="ai-chip" id="chip-health-'+cardId+'">\u2665\uFE0F Health</button>'+
+      '<button class="ai-chip" id="chip-activity-'+cardId+'">\uD83C\uDFC3 Activity</button>'+
+      '<button class="ai-chip" id="chip-outfit-'+cardId+'">\uD83D\uDC54 Outfit</button>'+
+      '<button class="ai-chip" id="chip-evening-'+cardId+'">\uD83C\uDF06 Evening</button>'+
+    '</div>'+
+    '<div class="ai-panel" id="panel-'+cardId+'">'+
+      '<div class="ai-panel-hdr">'+
+        '<div class="ai-panel-title" id="panel-title-'+cardId+'"></div>'+
+        '<button class="ai-panel-close" id="panel-close-'+cardId+'">\u2715</button>'+
+      '</div>'+
+      '<div class="ai-panel-body" id="panel-body-'+cardId+'"><div class="ai-loading"><div class="ai-spinner"></div>Generating\u2026</div></div>'+
+    '</div>'+
     '<div class="plan-wrap">'+
       '<button class="plan-btn" id="'+planBtnId+'">\u2728 Plan My Day with AI</button>'+
       '<div class="plan-result" id="'+planResId+'"></div>'+
@@ -736,60 +776,161 @@ function buildCard(d, cardId) {
 }
 
 /* ── LOAD AI NARRATIVE ── */
+/* ── LOAD AI NARRATIVE (auto-fires on card render) ── */
 function loadNarrative(d, cardId) {
-  var el=document.getElementById("narr-"+cardId);
-  if(!el)return;
-  var aqi=getCachedAQI(d.city);
-  var prompt="You are a sharp, no-nonsense local friend in "+d.city+" giving a real weather briefing.\n\n"+
-    "Conditions: "+d.temp+"\u00B0C, feels "+d.feels+"\u00B0C, "+d.cond+", humidity "+d.hum+"%, wind "+d.wind+" km/h, UV "+d.uv+", AQI "+aqi+".\n\n"+
-    "Write exactly 3 sentences:\n"+
-    "1. What the weather feels like on your body right now (describe the sensation, not just numbers)\n"+
-    "2. One specific, actionable thing to do or avoid today because of this weather\n"+
-    "3. One thing most people overlook about today's conditions that could affect their day\n\n"+
-    "Direct, specific, conversational. No emojis. Max 65 words total.";
-  var sys="You are a practical, locally-aware weather advisor. Be specific and human, never generic.";
-  callAI(prompt,sys,180,function(text){
-    if(!text){
-      el.innerHTML='<div class="ai-box-lbl">\u2736 AI Analysis</div><div class="ai-box-txt" style="color:var(--mid)">Analysis unavailable right now.</div>';
+  var el = document.getElementById("narr-" + cardId);
+  if (!el) return;
+  var aqi = getCachedAQI(d.city);
+  var prompt =
+    "You are a sharp, no-nonsense local friend in " + d.city + " giving a real weather briefing.\n\n" +
+    "Conditions right now: " + d.temp + "\u00B0C, feels " + d.feels + "\u00B0C, " + d.cond +
+    ", humidity " + d.hum + "%, wind " + d.wind + " km/h, UV index " + d.uv + ", AQI " + aqi + ".\n\n" +
+    "Write exactly 3 sentences:\n" +
+    "1. What this weather physically feels like on your body the moment you step outside (sensory, vivid)\n" +
+    "2. The single most important thing to do or avoid today given these exact conditions\n" +
+    "3. One overlooked detail about today that most people will miss until it affects their day\n\n" +
+    "Tone: direct, human, specific to " + d.city + ". No emojis. Max 70 words total.";
+  var sys = "You are a hyperlocal, practically-minded weather advisor. Never be generic. Every sentence must be specific to the exact conditions given.";
+  callAI(prompt, sys, 200, function(text) {
+    if (!text) {
+      el.innerHTML = '<div class="ai-box-lbl">\u2736 AI Analysis</div><div class="ai-box-txt" style="color:var(--mid)">Analysis unavailable — check back shortly.</div>';
       return;
     }
-    /* Safe sentence split — no lookbehind, works on all Safari */
-    var sents=text.replace(/([.!?])\s+/g,'$1\u0000').split('\u0000').filter(function(s){return s.trim().length>3;});
-    var html=sents.map(function(s){return'<div class="ai-sentence">'+s.trim()+'</div>';}).join("");
-    el.innerHTML='<div class="ai-box-lbl">\u2736 AI Analysis</div><div class="ai-box-txt">'+html+'</div>';
+    var sents = text.replace(/([.!?])\s+/g, '$1\u0000').split('\u0000').filter(function(s){return s.trim().length > 5;});
+    var html = sents.map(function(s){return '<div class="ai-sentence">' + s.trim() + '</div>';}).join("");
+    el.innerHTML = '<div class="ai-box-lbl">\u2736 AI Analysis</div><div class="ai-box-txt">' + html + '</div>';
+  });
+}
+
+/* ── AI CHIP PROMPTS ── */
+var AI_CHIPS = {
+  "health": {
+    title: "Health & Body Advisory",
+    prompt: function(d, aqi) {
+      return "City: " + d.city + ". Weather: " + d.temp + "\u00B0C feels " + d.feels + "\u00B0C, " +
+        d.cond + ", humidity " + d.hum + "%, UV " + d.uv + ", AQI " + aqi + ".\n\n" +
+        "Give a health advisory in 3 short points:\n" +
+        "1. Main physical risk today (heat stress, dehydration, UV burn, pollution, cold, etc.)\n" +
+        "2. Who should be most careful (elderly, kids, asthma, athletes, etc.) and why\n" +
+        "3. One specific thing to do before leaving the house today\n\n" +
+        "Each point: 1 sentence. Specific, not generic. No emojis.";
+    },
+    sys: "You are a doctor giving practical, specific weather-related health advice. Be precise, not alarmist."
+  },
+  "activity": {
+    title: "Best Activities Today",
+    prompt: function(d, aqi) {
+      return "City: " + d.city + ". Right now: " + d.temp + "\u00B0C, " + d.cond +
+        ", humidity " + d.hum + "%, wind " + d.wind + " km/h, UV " + d.uv + ", AQI " + aqi + ".\n\n" +
+        "List exactly 3 activities:\n" +
+        "DO: The single best outdoor activity for these conditions right now and when\n" +
+        "AVOID: One popular activity that is a bad idea today and why\n" +
+        "ALTERNATIVE: If weather is bad, the best indoor alternative specific to " + d.city + "\n\n" +
+        "Format each as 'DO: ...' / 'AVOID: ...' / 'ALTERNATIVE: ...'. One sentence each. No emojis.";
+    },
+    sys: "You are a local activity planner who knows the city intimately. Give specific, actionable advice."
+  },
+  "outfit": {
+    title: "What to Wear Today",
+    prompt: function(d, aqi) {
+      return "City: " + d.city + ". Conditions: " + d.temp + "\u00B0C feels " + d.feels + "\u00B0C, " +
+        d.cond + ", humidity " + d.hum + "%, wind " + d.wind + " km/h.\n\n" +
+        "Give a complete outfit recommendation in 3 lines:\n" +
+        "WEAR: Specific clothing items (fabrics, layers, type)\n" +
+        "BRING: What to carry (umbrella, sunscreen, water, jacket, etc.) and why\n" +
+        "SKIP: One thing people typically wear that is wrong for today\n\n" +
+        "Format: 'WEAR: ...' / 'BRING: ...' / 'SKIP: ...'. Practical and specific. No emojis.";
+    },
+    sys: "You are a practical stylist who prioritizes comfort and function in specific weather conditions."
+  },
+  "evening": {
+    title: "Evening Forecast",
+    prompt: function(d, aqi) {
+      return "City: " + d.city + ". Current daytime: " + d.temp + "\u00B0C, " + d.cond +
+        ", humidity " + d.hum + "%, wind " + d.wind + " km/h.\n\n" +
+        "Predict and advise for this evening (6pm-11pm) in 3 sentences:\n" +
+        "1. What conditions will likely shift to by evening (temp drop, wind change, rain chance)\n" +
+        "2. Best evening activity or outing for " + d.city + " given tonight's conditions\n" +
+        "3. One specific evening warning or tip for tonight\n\n" +
+        "Be specific about " + d.city + ". No emojis. Max 65 words.";
+    },
+    sys: "You are a local evening planner who knows how weather in this city typically evolves through the day."
+  }
+};
+
+function triggerChip(chipType, d, cardId) {
+  var cfg  = AI_CHIPS[chipType];
+  if (!cfg) return;
+  var panel      = document.getElementById("panel-" + cardId);
+  var panelTitle = document.getElementById("panel-title-" + cardId);
+  var panelBody  = document.getElementById("panel-body-" + cardId);
+  var chip       = document.getElementById("chip-" + chipType + "-" + cardId);
+  if (!panel || !panelTitle || !panelBody || !chip) return;
+
+  /* If same chip clicked again — toggle close */
+  if (panel.classList.contains("on") && panel.dataset.active === chipType) {
+    panel.classList.remove("on");
+    panel.dataset.active = "";
+    chip.classList.remove("loaded");
+    return;
+  }
+
+  /* Mark all chips unloaded, mark this one active */
+  ["health","activity","outfit","evening"].forEach(function(t){
+    var c = document.getElementById("chip-" + t + "-" + cardId);
+    if (c) { c.classList.remove("loaded"); c.disabled = false; }
+  });
+  chip.classList.add("loaded");
+  chip.disabled = true;
+
+  var aqi = getCachedAQI(d.city);
+  panelTitle.textContent = cfg.title;
+  panelBody.innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div>Generating\u2026</div>';
+  panel.dataset.active = chipType;
+  panel.classList.add("on");
+
+  callAI(cfg.prompt(d, aqi), cfg.sys, 200, function(text) {
+    chip.disabled = false;
+    if (!text) {
+      panelBody.innerHTML = '<div class="ai-line" style="color:var(--mid)">Could not generate. Try again.</div>';
+      return;
+    }
+    var lines = text.split("\n").filter(function(l){return l.trim().length > 3;});
+    panelBody.innerHTML = lines.map(function(l){return '<div class="ai-line">' + l.trim() + '</div>';}).join("");
   });
 }
 
 /* ── PLAN MY DAY ── */
 function triggerPlan(cardId) {
-  var d=CARD_DATA[cardId];
-  var btnEl=document.getElementById("planbtn-"+cardId);
-  var resEl=document.getElementById("planres-"+cardId);
-  if(!d||!btnEl||!resEl)return;
-  btnEl.textContent="\u2728 Generating\u2026";
-  btnEl.disabled=true;
+  var d     = CARD_DATA[cardId];
+  var btnEl = document.getElementById("planbtn-" + cardId);
+  var resEl = document.getElementById("planres-" + cardId);
+  if (!d || !btnEl || !resEl) return;
+  btnEl.textContent = "\u2728 Generating\u2026";
+  btnEl.disabled = true;
   resEl.classList.remove("on");
-  var aqi=getCachedAQI(d.city);
-  var aqiLine=aqi>100?" AQI is "+aqi+" \u2014 factor in poor air quality.":"";
-  var prompt="Today in "+d.city+": "+d.temp+"\u00B0C, "+d.cond+", humidity "+d.hum+"%, wind "+d.wind+" km/h, UV "+d.uv+"."+aqiLine+"\n\n"+
-    "Give a smart, practical day schedule. Use exactly this format:\n\n"+
-    "\uD83C\uDF05 Morning (6am\u201311am): [specific advice]\n"+
-    "\u2600\uFE0F Afternoon (12pm\u20135pm): [what to do or avoid at peak conditions]\n"+
-    "\uD83C\uDF06 Evening (6pm\u201310pm): [best window and what makes sense outside]\n\n"+
-    "Each line max 20 words. Specific to "+d.city+". No generic advice.";
-  callAI(prompt,"You are a local city guide giving sharp, practical weather-based day plans.",220,function(text){
-    if(!text){
-      resEl.innerHTML='<div class="plan-section" style="color:var(--mid)">Could not generate plan right now. Try again.</div>';
+  var aqi = getCachedAQI(d.city);
+  var aqiLine = aqi > 100 ? " AQI is " + aqi + " \u2014 factor in air quality." : "";
+  var prompt =
+    "Today in " + d.city + ": " + d.temp + "\u00B0C, feels " + d.feels + "\u00B0C, " +
+    d.cond + ", humidity " + d.hum + "%, wind " + d.wind + " km/h, UV " + d.uv + "." + aqiLine + "\n\n" +
+    "Write a complete practical day plan in exactly this format:\n\n" +
+    "\uD83C\uDF05 Morning (6am\u201311am): [what to do, what to watch out for, best window if any]\n" +
+    "\u2600\uFE0F Afternoon (12pm\u20135pm): [peak conditions, what to avoid or lean into]\n" +
+    "\uD83C\uDF06 Evening (6pm\u201310pm): [best outdoor window, what shifts by evening]\n" +
+    "\uD83D\uDCA1 Local tip: [one thing specific to " + d.city + " that locals know about this weather]\n\n" +
+    "Each line: max 25 words. Be specific to " + d.city + " and these exact conditions. No filler.";
+  callAI(prompt, "You are a hyper-local city guide with deep knowledge of " + d.city + ". Give sharp, specific, weather-aware day plans.", 280, function(text) {
+    btnEl.textContent = "\u2728 Plan My Day with AI";
+    btnEl.disabled = false;
+    if (!text) {
+      resEl.innerHTML = '<div class="plan-section" style="color:var(--mid)">Could not generate plan. Try again.</div>';
       resEl.classList.add("on");
-      btnEl.textContent="\u2728 Plan My Day with AI";
-      btnEl.disabled=false;
       return;
     }
-    var lines=text.split("\n").filter(function(l){return l.trim().length>3;});
-    resEl.innerHTML=lines.map(function(l){return'<div class="plan-section">'+l.trim()+'</div>';}).join("");
+    var lines = text.split("\n").filter(function(l){return l.trim().length > 3;});
+    resEl.innerHTML = lines.map(function(l){return '<div class="plan-section">' + l.trim() + '</div>';}).join("");
     resEl.classList.add("on");
-    btnEl.textContent="\u2728 Plan My Day with AI";
-    btnEl.disabled=false;
   });
 }
 
@@ -1110,8 +1251,24 @@ function postRender(d,cardId){
   CARD_DATA[cardId]=d;
   renderAQIEl("aqi-"+cardId,d.city);
   loadNarrative(d,cardId);
+  /* Wire Plan My Day */
   var btn=document.getElementById("planbtn-"+cardId);
   if(btn)btn.addEventListener("click",function(){triggerPlan(cardId);});
+  /* Wire AI chips */
+  ["health","activity","outfit","evening"].forEach(function(t){
+    var chip=document.getElementById("chip-"+t+"-"+cardId);
+    if(chip)chip.addEventListener("click",function(){triggerChip(t,d,cardId);});
+  });
+  /* Wire chip close */
+  var closeBtn=document.getElementById("panel-close-"+cardId);
+  if(closeBtn)closeBtn.addEventListener("click",function(){
+    var panel=document.getElementById("panel-"+cardId);
+    if(panel){panel.classList.remove("on");panel.dataset.active="";}
+    ["health","activity","outfit","evening"].forEach(function(t){
+      var c=document.getElementById("chip-"+t+"-"+cardId);
+      if(c){c.classList.remove("loaded");c.disabled=false;}
+    });
+  });
 }
 
 /* ── RENDER ── */
@@ -1122,6 +1279,7 @@ function renderSingle(d){
   c0.innerHTML=buildCard(d,"c0");c0.className="cc";
   document.getElementById("c1").style.display="none";
   document.getElementById("verdictEl").style.display="none";
+  var cmpEl=document.getElementById("cmpAiEl");if(cmpEl)cmpEl.style.display="none";
   /* Best week */
   document.getElementById("bwCities").innerHTML=buildBestWeek([d]);
   document.getElementById("bwEl").style.display="block";
@@ -1142,6 +1300,29 @@ function renderCompare(a,b){
   c1.innerHTML=buildCard(b,"c1");c1.className="cc"+(sb>sa?" winner":"");
   c1.style.display="";
   showVerdict(a,b);
+  /* AI comparison analysis */
+  var cmpEl=document.getElementById("cmpAiEl");
+  var cmpBody=document.getElementById("cmpAiBody");
+  if(cmpEl&&cmpBody){
+    cmpEl.style.display="block";
+    cmpBody.innerHTML='<div class="ai-loading"><div class="ai-spinner"></div>Generating AI comparison\u2026</div>';
+    var aqiA=getCachedAQI(a.city),aqiB=getCachedAQI(b.city);
+    var cmpPrompt=
+      "Compare the weather in "+a.city+" vs "+b.city+" right now.\n\n"+
+      a.city+": "+a.temp+"\u00B0C feels "+a.feels+"\u00B0C, "+a.cond+", humidity "+a.hum+"%, UV "+a.uv+", AQI "+aqiA+"\n"+
+      b.city+": "+b.temp+"\u00B0C feels "+b.feels+"\u00B0C, "+b.cond+", humidity "+b.hum+"%, UV "+b.uv+", AQI "+aqiB+"\n\n"+
+      "Write exactly 4 sentences:\n"+
+      "1. Which city has the better weather right now and the single most decisive reason why\n"+
+      "2. What you would physically feel if you stepped outside in each city (contrast them)\n"+
+      "3. Who should pick which city — give a specific person/activity scenario for each\n"+
+      "4. One surprising or counterintuitive fact about how these two cities compare today\n\n"+
+      "Be specific, vivid, and direct. No emojis. Max 90 words.";
+    callAI(cmpPrompt,"You are a sharp weather analyst comparing two cities. Be specific, vivid, and never generic.",250,function(text){
+      if(!text){cmpBody.innerHTML='<span style="color:var(--mid)">AI comparison unavailable right now.</span>';return;}
+      var sents=text.replace(/([.!?])\s+/g,'$1\u0000').split('\u0000').filter(function(s){return s.trim().length>5;});
+      cmpBody.innerHTML=sents.map(function(s){return'<div class="ai-sentence" style="border-color:var(--purple-br)">'+s.trim()+'</div>';}).join("");
+    });
+  }
   /* Best week — side by side */
   document.getElementById("bwCities").innerHTML=buildBestWeek([a,b]);
   document.getElementById("bwEl").style.display="block";
