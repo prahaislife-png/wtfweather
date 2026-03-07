@@ -475,49 +475,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 (function () {
 "use strict";
 
-/* ── CITY DATABASE ── */
-var CITIES = {
-  "mumbai":    {city:"Mumbai",    cc:"India",       temp:34,feels:41,cond:"Humid & Hazy",    hum:89,wind:14,vis:4, uv:7, dew:28,pressure:1008,ptrend:"stable"},
-  "delhi":     {city:"Delhi",     cc:"India",       temp:42,feels:47,cond:"Smoky Sunshine",  hum:22,wind:18,vis:3, uv:9, dew:18,pressure:998, ptrend:"falling"},
-  "bengaluru": {city:"Bengaluru", cc:"India",       temp:27,feels:28,cond:"Partly Cloudy",   hum:62,wind:10,vis:10,uv:5, dew:19,pressure:1012,ptrend:"rising"},
-  "bangalore": {city:"Bengaluru", cc:"India",       temp:27,feels:28,cond:"Partly Cloudy",   hum:62,wind:10,vis:10,uv:5, dew:19,pressure:1012,ptrend:"rising"},
-  "pune":      {city:"Pune",      cc:"India",       temp:36,feels:39,cond:"Clear & Hot",     hum:35,wind:12,vis:9, uv:8, dew:17,pressure:1006,ptrend:"stable"},
-  "chennai":   {city:"Chennai",   cc:"India",       temp:38,feels:44,cond:"Sunny & Steamy",  hum:78,wind:16,vis:7, uv:8, dew:29,pressure:1010,ptrend:"stable"},
-  "hyderabad": {city:"Hyderabad", cc:"India",       temp:37,feels:41,cond:"Hot & Sunny",     hum:40,wind:13,vis:8, uv:8, dew:20,pressure:1007,ptrend:"stable"},
-  "kolkata":   {city:"Kolkata",   cc:"India",       temp:35,feels:42,cond:"Muggy",           hum:82,wind:9, vis:5, uv:7, dew:30,pressure:1005,ptrend:"falling"},
-  "nanded":    {city:"Nanded",    cc:"India",       temp:39,feels:43,cond:"Scorching Sun",   hum:28,wind:11,vis:10,uv:9, dew:15,pressure:1004,ptrend:"stable"},
-  "ahmedabad": {city:"Ahmedabad", cc:"India",       temp:40,feels:44,cond:"Dry Heat",        hum:20,wind:16,vis:10,uv:9, dew:12,pressure:1002,ptrend:"falling"},
-  "jaipur":    {city:"Jaipur",    cc:"India",       temp:41,feels:45,cond:"Clear & Blazing", hum:18,wind:14,vis:10,uv:10,dew:10,pressure:1001,ptrend:"falling"},
-  "london":    {city:"London",    cc:"UK",          temp:10,feels:7, cond:"Light Drizzle",   hum:84,wind:26,vis:8, uv:1, dew:7, pressure:1018,ptrend:"rising"},
-  "paris":     {city:"Paris",     cc:"France",      temp:14,feels:12,cond:"Partly Cloudy",   hum:70,wind:18,vis:12,uv:3, dew:8, pressure:1015,ptrend:"stable"},
-  "berlin":    {city:"Berlin",    cc:"Germany",     temp:9, feels:6, cond:"Cloudy",          hum:78,wind:20,vis:12,uv:2, dew:5, pressure:1014,ptrend:"rising"},
-  "prague":    {city:"Prague",    cc:"Czech Rep.",  temp:11,feels:8, cond:"Overcast",        hum:74,wind:22,vis:14,uv:2, dew:6, pressure:1016,ptrend:"rising"},
-  "vienna":    {city:"Vienna",    cc:"Austria",     temp:13,feels:10,cond:"Partly Cloudy",   hum:68,wind:16,vis:14,uv:3, dew:7, pressure:1017,ptrend:"stable"},
-  "amsterdam": {city:"Amsterdam", cc:"Netherlands", temp:10,feels:7, cond:"Light Rain",      hum:86,wind:28,vis:9, uv:1, dew:8, pressure:1013,ptrend:"rising"},
-  "madrid":    {city:"Madrid",    cc:"Spain",       temp:22,feels:21,cond:"Sunny",           hum:38,wind:14,vis:16,uv:6, dew:6, pressure:1018,ptrend:"stable"},
-  "rome":      {city:"Rome",      cc:"Italy",       temp:20,feels:19,cond:"Mostly Sunny",    hum:52,wind:12,vis:15,uv:5, dew:9, pressure:1016,ptrend:"stable"},
-  "stockholm": {city:"Stockholm", cc:"Sweden",      temp:6, feels:3, cond:"Cloudy",          hum:80,wind:18,vis:12,uv:1, dew:3, pressure:1019,ptrend:"rising"},
-  "oslo":      {city:"Oslo",      cc:"Norway",      temp:5, feels:2, cond:"Partly Cloudy",   hum:75,wind:14,vis:14,uv:1, dew:1, pressure:1020,ptrend:"stable"},
-  "warsaw":    {city:"Warsaw",    cc:"Poland",      temp:8, feels:5, cond:"Overcast",        hum:82,wind:16,vis:10,uv:1, dew:5, pressure:1015,ptrend:"rising"},
-  "budapest":  {city:"Budapest",  cc:"Hungary",     temp:12,feels:9, cond:"Partly Cloudy",   hum:70,wind:14,vis:14,uv:2, dew:6, pressure:1016,ptrend:"stable"},
-  "lisbon":    {city:"Lisbon",    cc:"Portugal",    temp:18,feels:17,cond:"Sunny",           hum:55,wind:20,vis:16,uv:5, dew:8, pressure:1017,ptrend:"stable"},
-  "athens":    {city:"Athens",    cc:"Greece",      temp:20,feels:20,cond:"Clear & Sunny",   hum:50,wind:14,vis:16,uv:6, dew:9, pressure:1015,ptrend:"stable"},
-  "zurich":    {city:"Zurich",    cc:"Switzerland", temp:10,feels:7, cond:"Partly Cloudy",   hum:72,wind:16,vis:14,uv:2, dew:5, pressure:1016,ptrend:"stable"},
-  "brussels":  {city:"Brussels",  cc:"Belgium",     temp:11,feels:8, cond:"Overcast",        hum:84,wind:22,vis:10,uv:1, dew:8, pressure:1014,ptrend:"rising"},
-  "barcelona": {city:"Barcelona", cc:"Spain",       temp:19,feels:18,cond:"Sunny",           hum:58,wind:16,vis:16,uv:5, dew:10,pressure:1017,ptrend:"stable"},
-  "milan":     {city:"Milan",     cc:"Italy",       temp:14,feels:12,cond:"Hazy",            hum:76,wind:8, vis:8, uv:3, dew:9, pressure:1013,ptrend:"stable"},
-  "copenhagen":{city:"Copenhagen",cc:"Denmark",     temp:8, feels:5, cond:"Cloudy",          hum:80,wind:26,vis:12,uv:1, dew:4, pressure:1018,ptrend:"rising"},
-  "new york":  {city:"New York",  cc:"USA",         temp:18,feels:16,cond:"Mostly Sunny",    hum:55,wind:20,vis:14,uv:4, dew:8, pressure:1016,ptrend:"stable"},
-  "newyork":   {city:"New York",  cc:"USA",         temp:18,feels:16,cond:"Mostly Sunny",    hum:55,wind:20,vis:14,uv:4, dew:8, pressure:1016,ptrend:"stable"},
-  "dubai":     {city:"Dubai",     cc:"UAE",         temp:41,feels:46,cond:"Hazy & Hot",      hum:48,wind:15,vis:6, uv:10,dew:26,pressure:1002,ptrend:"stable"},
-  "tokyo":     {city:"Tokyo",     cc:"Japan",       temp:20,feels:19,cond:"Mostly Sunny",    hum:52,wind:14,vis:14,uv:5, dew:9, pressure:1014,ptrend:"stable"},
-  "singapore": {city:"Singapore", cc:"Singapore",   temp:31,feels:37,cond:"Thundery Showers",hum:85,wind:12,vis:9, uv:7, dew:27,pressure:1008,ptrend:"falling"},
-  "sydney":    {city:"Sydney",    cc:"Australia",   temp:22,feels:22,cond:"Sunny",           hum:60,wind:18,vis:15,uv:6, dew:13,pressure:1014,ptrend:"stable"},
-  "toronto":   {city:"Toronto",   cc:"Canada",      temp:8, feels:5, cond:"Partly Cloudy",   hum:65,wind:24,vis:14,uv:3, dew:2, pressure:1015,ptrend:"stable"},
-  "bangkok":   {city:"Bangkok",   cc:"Thailand",    temp:33,feels:40,cond:"Hot & Humid",     hum:80,wind:10,vis:8, uv:8, dew:27,pressure:1007,ptrend:"falling"},
-  "cairo":     {city:"Cairo",     cc:"Egypt",       temp:38,feels:38,cond:"Sunny & Dry",     hum:20,wind:15,vis:12,uv:10,dew:8, pressure:1010,ptrend:"stable"},
-  "nairobi":   {city:"Nairobi",   cc:"Kenya",       temp:21,feels:21,cond:"Partly Cloudy",   hum:65,wind:12,vis:14,uv:6, dew:13,pressure:1013,ptrend:"stable"},
-};
+/* ── CITY DATABASE removed — all data is now live from wttr.in ── */
+var CITIES = {}; /* kept as empty fallback shell — not used for lookups */
 
 var AQI_FB = {
   "mumbai":148,"delhi":198,"bengaluru":62,"bangalore":62,"pune":95,
@@ -603,15 +562,20 @@ function getCachedAQI(city){
 
 /* Fetch live AQI via our own /api/aqi proxy — key is safe server-side */
 function fetchAQI(city, cb) {
-  var key=city.toLowerCase().replace(/\s/g,"");
-  if(AQI_CACHE[key]!==undefined){cb(AQI_CACHE[key]);return;}
+  var cacheKey=city.toLowerCase().replace(/\s/g,"");
+  if(AQI_CACHE[cacheKey]!==undefined){cb(AQI_CACHE[cacheKey]);return;}
   fetch("/api/aqi?city="+encodeURIComponent(city))
-    .then(function(r){return r.json();})
-    .then(function(j){
-      AQI_CACHE[key]=j.aqi&&typeof j.aqi==="number"?j.aqi:getFbAQI(city);
-      cb(AQI_CACHE[key]);
+    .then(function(r){
+      if(!r.ok)throw new Error("non-ok "+r.status);
+      return r.json();
     })
-    .catch(function(){AQI_CACHE[key]=getFbAQI(city);cb(AQI_CACHE[key]);});
+    .then(function(j){
+      var raw=j.aqi;
+      var parsed=typeof raw==="number"?raw:parseInt(raw,10);
+      AQI_CACHE[cacheKey]=(!isNaN(parsed)&&parsed>=0)?parsed:getFbAQI(city);
+      cb(AQI_CACHE[cacheKey]);
+    })
+    .catch(function(){AQI_CACHE[cacheKey]=getFbAQI(city);cb(AQI_CACHE[cacheKey]);});
 }
 
 function renderAQIEl(elId, city) {
@@ -678,37 +642,25 @@ function mkInsights(d) {
 }
 
 /* ── HOURLY ── */
+/* ── HOURLY — use real data from wttr.in if available, fallback gracefully ── */
 function genHourly(d) {
-  var now=new Date().getHours(),hours=[],baseTemp=d.temp;
-  var isWet=["cloud","drizzle","rain","fog","mist","haze","smoke","thunder","snow","shower","overcast"].some(function(x){return(d.cond||"").toLowerCase().indexOf(x)>=0;});
-  for(var i=0;i<8;i++){
-    var h=(now+i*2)%24;
-    var hLabel=h===0?"12am":h<12?h+"am":h===12?"12pm":(h-12)+"pm";
-    var offset=0;
-    if(h>=6&&h<=14)offset=Math.min(3,(14-h)*0.5);
-    else if(h>14&&h<=18)offset=Math.max(-2,(h-18));
-    else if(h>18)offset=-(h-18)*0.4;
-    var t=Math.round(baseTemp+offset);
-    var rain=isWet?(20+Math.round(Math.random()*50)):Math.round(Math.random()*12);
-    if(h>=22||h<6)rain=Math.min(rain,15);
-    var cond=(h>=22||h<5)?"Clear Night":d.cond;
-    hours.push({h:hLabel,t:t,rain:rain,cond:cond,now:i===0});
+  if (d.hourly && d.hourly.length > 0) return d.hourly;
+  /* Fallback: basic time-of-day curve (should rarely hit this) */
+  var now = new Date().getHours(), hours = [];
+  for (var i = 0; i < 8; i++) {
+    var h = (now + i * 3) % 24;
+    var lbl = h === 0 ? "12am" : h < 12 ? h + "am" : h === 12 ? "12pm" : (h - 12) + "pm";
+    hours.push({ h: lbl, t: d.temp, rain: 0, cond: d.cond, now: i === 0 });
   }
   return hours;
 }
 
-/* ── 3-DAY ── */
+/* ── 3-DAY — use real forecast data from wttr.in if available ── */
 function gen3Day(d) {
-  var condPool,c=(d.cond||"").toLowerCase();
-  if(c.indexOf("rain")>=0||c.indexOf("shower")>=0)condPool=["Light Rain","Partly Cloudy","Sunny"];
-  else if(c.indexOf("thunder")>=0)condPool=["Thunderstorms","Showers","Partly Cloudy"];
-  else if(c.indexOf("cloud")>=0||c.indexOf("overcast")>=0)condPool=["Overcast","Partly Cloudy","Sunny"];
-  else condPool=[d.cond,"Partly Cloudy","Sunny"];
-  return["Today","Tomorrow","Day 3"].map(function(name,i){
-    var t=d.temp+(i===0?0:Math.round((Math.random()-0.5)*6));
-    var h=Math.max(10,Math.min(95,d.hum+(i===0?0:Math.round((Math.random()-0.5)*14))));
-    var cond=condPool[i]||d.cond;
-    return{name:name,t:t,cond:cond,os:oScore({temp:t,hum:h,cond:cond,wind:d.wind,uv:d.uv,dew:d.dew||15,pressure:d.pressure||1013,ptrend:"stable"})};
+  if (d.days3 && d.days3.length > 0) return d.days3;
+  /* Fallback */
+  return ["Today", "Tomorrow", "Day 3"].map(function(name, i) {
+    return { name: name, t: d.temp, tmin: d.temp - 5, cond: d.cond, os: oScore(d) };
   });
 }
 
@@ -732,7 +684,7 @@ function buildCard(d, cardId) {
   }).join("");
 
   var daysHtml=days.map(function(day){
-    return'<div class="cd-row"><div class="cd-day">'+day.name+'</div><div class="cd-ic">'+wIcon(day.cond,day.t)+'</div><div class="cd-cn">'+day.cond+'</div><div class="cd-tp">'+day.t+'\u00B0C</div><div class="cd-sc '+dScCls(day.os)+'">'+day.os+'/10</div></div>';
+    var minTxt=day.tmin!==undefined?" / "+day.tmin+"°":"";return'<div class="cd-row"><div class="cd-day">'+day.name+'</div><div class="cd-ic">'+wIcon(day.cond,day.t)+'</div><div class="cd-cn">'+day.cond+'</div><div class="cd-tp">'+day.t+'\u00B0C'+minTxt+'</div><div class="cd-sc '+dScCls(day.os)+'">'+day.os+'/10</div></div>';
   }).join("");
 
   var badgesHtml=bs.map(function(b){return'<span class="badge '+b.cls+'">'+b.t+'</span>';}).join("");
@@ -1008,26 +960,88 @@ function showVerdict(a,b){
 }
 
 /* ── FETCH CITY ── */
-function lookupCity(raw){
-  var key=raw.toLowerCase().replace(/\s+/g," ").trim();
-  if(CITIES[key])return JSON.parse(JSON.stringify(CITIES[key]));
-  var ks=Object.keys(CITIES);
-  for(var i=0;i<ks.length;i++){if(key.indexOf(ks[i])>=0||ks[i].indexOf(key)>=0)return JSON.parse(JSON.stringify(CITIES[ks[i]]));}
-  return null;
-}
-function fetchLive(raw,cb){
-  fetch("https://wttr.in/"+encodeURIComponent(raw)+"?format=j1")
-    .then(function(r){if(!r.ok)throw new Error("not found");return r.json();})
-    .then(function(j){
-      try{
-        var w=j.current_condition[0],area=j.nearest_area[0];
-        var pres=parseInt(w.pressure||"1013",10);
-        cb(null,{city:area.areaName[0].value,cc:area.country[0].value,temp:parseInt(w.temp_C,10),feels:parseInt(w.FeelsLikeC,10),cond:w.weatherDesc[0].value,hum:parseInt(w.humidity,10),wind:parseInt(w.windspeedKmph,10),vis:parseInt(w.visibility,10),uv:parseInt(w.uvIndex||"4",10),dew:parseInt(w.DewPointC||"15",10),pressure:pres,ptrend:pres<1010?"falling":pres>1018?"rising":"stable"});
-      }catch(e){cb(new Error("parse"));}
+/* ── LIVE FETCH — always hits wttr.in, extracts ALL real data ── */
+function fetchLive(raw, cb) {
+  fetch("https://wttr.in/" + encodeURIComponent(raw) + "?format=j1")
+    .then(function(r) { if (!r.ok) throw new Error("not found"); return r.json(); })
+    .then(function(j) {
+      try {
+        var w    = j.current_condition[0];
+        var area = j.nearest_area[0];
+        var pres = parseInt(w.pressure || "1013", 10);
+
+        var d = {
+          city:     area.areaName[0].value,
+          cc:       area.country[0].value,
+          temp:     parseInt(w.temp_C, 10),
+          feels:    parseInt(w.FeelsLikeC, 10),
+          cond:     w.weatherDesc[0].value,
+          hum:      parseInt(w.humidity, 10),
+          wind:     parseInt(w.windspeedKmph, 10),
+          vis:      parseInt(w.visibility, 10),
+          uv:       parseInt(w.uvIndex || "4", 10),
+          dew:      parseInt(w.DewPointC || "15", 10),
+          pressure: pres,
+          ptrend:   pres < 1010 ? "falling" : pres > 1018 ? "rising" : "stable",
+        };
+
+        /* ── Real hourly slots from wttr.in ── */
+        var nowH = new Date().getHours();
+        var allSlots = [];
+        for (var di = 0; di < Math.min(j.weather.length, 2); di++) {
+          var daySlots = j.weather[di].hourly;
+          for (var si = 0; si < daySlots.length; si++) {
+            var s  = daySlots[si];
+            var hh = parseInt(s.time, 10) / 100;
+            allSlots.push({ dayOffset: di, hour: hh, temp: parseInt(s.tempC, 10), rain: parseInt(s.chanceofrain, 10), cond: s.weatherDesc[0].value });
+          }
+        }
+        /* Find first slot >= current hour today */
+        var startIdx = 0;
+        for (var k = 0; k < allSlots.length; k++) {
+          if (allSlots[k].dayOffset === 0 && allSlots[k].hour >= nowH) { startIdx = k; break; }
+        }
+        d.hourly = [];
+        for (var hi = 0; hi < 8; hi++) {
+          var slot = allSlots[(startIdx + hi) % allSlots.length];
+          if (!slot) continue;
+          var h2 = slot.hour;
+          var lbl = h2 === 0 ? "12am" : h2 < 12 ? h2 + "am" : h2 === 12 ? "12pm" : (h2 - 12) + "pm";
+          d.hourly.push({ h: lbl, t: slot.temp, rain: slot.rain, cond: slot.cond, now: hi === 0 });
+        }
+
+        /* ── Real 3-day forecast ── */
+        var dayNames = ["Today", "Tomorrow", "Day 3"];
+        d.days3 = [];
+        for (var fd = 0; fd < Math.min(j.weather.length, 3); fd++) {
+          var day      = j.weather[fd];
+          var noonSlot = day.hourly[4] || day.hourly[Math.floor(day.hourly.length / 2)];
+          var dayTemp  = parseInt(day.maxtemp_C, 10);
+          var dayMinT  = parseInt(day.mintemp_C, 10);
+          var dayCond  = noonSlot ? noonSlot.weatherDesc[0].value : d.cond;
+          var dayHum   = noonSlot ? parseInt(noonSlot.humidity, 10) : d.hum;
+          var dayWind  = noonSlot ? parseInt(noonSlot.windspeedKmph, 10) : d.wind;
+          var dayUV    = parseInt(day.uvIndex || d.uv, 10);
+          d.days3.push({
+            name: dayNames[fd] || ("Day " + (fd + 1)),
+            t:    dayTemp,
+            tmin: dayMinT,
+            cond: dayCond,
+            os:   oScore({ temp: dayTemp, hum: dayHum, cond: dayCond, wind: dayWind, uv: dayUV, dew: d.dew, pressure: d.pressure, ptrend: "stable" }),
+          });
+        }
+        while (d.days3.length < 3) {
+          d.days3.push({ name: dayNames[d.days3.length], t: d.temp, tmin: d.temp - 5, cond: d.cond, os: oScore(d) });
+        }
+
+        cb(null, d);
+      } catch(e) { cb(new Error("parse")); }
     })
-    .catch(function(e){cb(e);});
+    .catch(function(e) { cb(e); });
 }
-function getCity(raw,cb){var d=lookupCity(raw);if(d){cb(null,d);return;}fetchLive(raw,cb);}
+/* Always live — no stale hardcoded lookups */
+function lookupCity() { return null; }
+function getCity(raw, cb) { fetchLive(raw, cb); }
 
 /* ── POST-RENDER: wire AI + AQI after DOM insertion ── */
 function postRender(d,cardId){
@@ -1183,26 +1197,38 @@ function showToast(msg){var t=document.getElementById("toastEl");t.textContent=m
 
 /* ── EXAMPLE ── */
 function renderExample(){
-  var a=CITIES["prague"],b=CITIES["mumbai"];if(!a||!b)return;
-  var sa=oScore(a),sb=oScore(b);
-  var vhtml='<div class="verdict" style="margin-bottom:16px"><div class="v-ic">'+wIcon(b.cond,b.temp)+'</div>'+
-    '<div class="v-cp"><div class="v-title">Mumbai wins on outdoor score today</div>'+
-    '<div class="v-sub">Score '+sb+' vs '+sa+'. Prague is overcast, cold and damp.</div></div>'+
-    '<div class="v-win">Mumbai wins \uD83C\uDFC6</div></div>';
-  var ghtml='<div class="cg" style="margin-bottom:16px">'+
-    '<div class="cc">'+buildCard(a,"ex0")+'</div>'+
-    '<div class="cc winner">'+buildCard(b,"ex1")+'</div></div>';
-  /* Best week + local tips for example */
-  var bwHtml='<div class="bw" style="margin-bottom:16px">'+
-    '<div class="bw-hdr"><div class="bw-hdr-top"><div class="bw-title">\uD83D\uDCC5 Best Time This Week</div><div class="bw-badge">7-Day Outlook</div></div>'+
-    '<div class="bw-sub">When should you actually go outside \u2014 or plan a visit?</div></div>'+
-    buildBestWeek([a,b])+'</div>';
-  var ltHtml='<div class="lt" style="margin-bottom:16px">'+
-    '<div class="lt-hdr"><div class="lt-hdr-top"><div class="lt-title">\uD83D\uDDFA\uFE0F Local Survival Guide</div></div>'+
-    '<div class="lt-sub">What locals actually know about today\u2019s conditions</div></div>'+
-    buildLocalTips([a,b])+'</div>';
-  document.getElementById("exMount").innerHTML=vhtml+ghtml+bwHtml+ltHtml;
-  postRender(a,"ex0");postRender(b,"ex1");
+  var exEl=document.getElementById("exMount");
+  if(!exEl)return;
+  exEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--mid);font-size:.8rem">Loading live example: Prague vs Mumbai\u2026</div>';
+  var res=[null,null],done=0,errored=false;
+  function onDone(idx,err,d){
+    if(errored)return;
+    if(err){errored=true;exEl.innerHTML='';return;} /* silently hide on error */
+    res[idx]=d;done++;
+    if(done===2){
+      var a=res[0],b=res[1];
+      var sa=oScore(a),sb=oScore(b),w=sa>=sb?a:b,l=sa>=sb?b:a;
+      var vhtml='<div class="verdict" style="margin-bottom:16px"><div class="v-ic">'+wIcon(w.cond,w.temp)+'</div>'+
+        '<div class="v-cp"><div class="v-title">'+w.city+' wins on outdoor score today</div>'+
+        '<div class="v-sub">Score '+Math.max(sa,sb)+' vs '+Math.min(sa,sb)+'. Live data right now.</div></div>'+
+        '<div class="v-win">'+w.city+' wins \uD83C\uDFC6</div></div>';
+      var ghtml='<div class="cg" style="margin-bottom:16px">'+
+        '<div class="cc'+(sa>=sb?" winner":"")+'">'+buildCard(a,"ex0")+'</div>'+
+        '<div class="cc'+(sb>sa?" winner":"")+'">'+buildCard(b,"ex1")+'</div></div>';
+      var bwHtml='<div class="bw" style="margin-bottom:16px">'+
+        '<div class="bw-hdr"><div class="bw-hdr-top"><div class="bw-title">\uD83D\uDCC5 Best Time This Week</div><div class="bw-badge">7-Day Outlook</div></div>'+
+        '<div class="bw-sub">When should you actually go outside \u2014 or plan a visit?</div></div>'+
+        buildBestWeek([a,b])+'</div>';
+      var ltHtml='<div class="lt" style="margin-bottom:16px">'+
+        '<div class="lt-hdr"><div class="lt-hdr-top"><div class="lt-title">\uD83D\uDDFA\uFE0F Local Survival Guide</div></div>'+
+        '<div class="lt-sub">What locals actually know about today\u2019s conditions</div></div>'+
+        buildLocalTips([a,b])+'</div>';
+      exEl.innerHTML=vhtml+ghtml+bwHtml+ltHtml;
+      postRender(a,"ex0");postRender(b,"ex1");
+    }
+  }
+  fetchLive("Prague",function(e,d){onDone(0,e,d);});
+  fetchLive("Mumbai",function(e,d){onDone(1,e,d);});
 }
 
 /* ── WIRE EVENTS — no inline onclick anywhere ── */
