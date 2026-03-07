@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeatherRoast 🔥</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --white: #ffffff;
+  --off: #f7f6f2;
+  --pale: #eeecea;
+  --border: #e0ddd8;
+  --text: #1a1917;
+  --mid: #6b6760;
+  --light: #a8a49f;
+  --orange: #f05c2a;
+  --orange-light: #fff1ec;
+  --orange-mid: #fde0d4;
+  --green: #2a9d5c;
+  --green-light: #e8f7ef;
+  --blue: #2a7ef0;
+  --blue-light: #eaf1fd;
+  --yellow: #f0b72a;
+  --yellow-light: #fef8e8;
+}
+
+body {
+  background: var(--off);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.logo {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(2.4rem, 9vw, 3.6rem);
+  font-style: italic;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.logo span {
+  display: inline-block;
+  animation: bob 2.5s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-5px) rotate(3deg); }
+}
+
+.sub {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--mid);
+  font-weight: 600;
+}
+
+.card {
+  background: var(--white);
+  border-radius: 24px;
+  border: 1.5px solid var(--border);
+  padding: 28px;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+}
+
+.input-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--off);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 6px 6px 6px 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-wrap:focus-within {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px var(--orange-mid);
+}
+
+.city-field {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 0;
+}
+
+.city-field::placeholder { color: var(--light); font-weight: 600; }
+
+.btn-go {
+  background: var(--orange);
+  color: white;
+  border: none;
+  border-radius: 11px;
+  padding: 10px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.btn-go:hover  { background: #d94e20; }
+.btn-go:active { transform: scale(0.96); }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  color: var(--light);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+.btn-loc {
+  width: 100%;
+  background: var(--white);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-loc:hover { background: var(--off); border-color: #ccc; }
+.btn-loc:active { transform: scale(0.98); }
+
+.demo-row {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.demo-label {
+  width: 100%;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--light);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.chip {
+  background: var(--off);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 5px 13px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--mid);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.chip:hover {
+  background: var(--orange-light);
+  border-color: var(--orange-mid);
+  color: var(--orange);
+}
+
+.error {
+  display: none;
+  margin-top: 14px;
+  background: #fff5f5;
+  border: 1.5px solid #fcc;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  color: #c0392b;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.error.show { display: block; }
+
+.loading {
+  display: none;
+  text-align: center;
+  padding: 36px 0;
+}
+.loading.show { display: block; }
+
+.dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; }
+.dot {
+  width: 9px; height: 9px;
+  background: var(--orange);
+  border-radius: 50%;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%,80%,100% { transform: translateY(0); opacity: 0.4; }
+  40%          { transform: translateY(-8px); opacity: 1; }
+}
+
+.loading-text { font-size: 0.82rem; font-weight: 700; color: var(--mid); }
+
+.result { display: none; animation: up 0.4s cubic-bezier(0.16,1,0.3,1); }
+.result.show { display: block; }
+
+@keyframes up {
+  from { opacity:0; transform: translateY(16px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.weather-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.city-label {
+  font-family: 'Instrument Serif', serif;
+  font-size: 2rem;
+  font-style: italic;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.city-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--light);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.temp-block { text-align: right; }
+
+.temp-num {
+  font-family: 'Instrument Serif', serif;
+  font-size: 3rem;
+  color: var(--orange);
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.temp-cond {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--mid);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.stat-pill {
+  background: var(--off);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--mid);
+}
+
+.badges { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 20px; }
+
+.badge {
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.badge-hot    { background: var(--orange-light); color: var(--orange); }
+.badge-humid  { background: var(--blue-light);   color: var(--blue); }
+.badge-wind   { background: var(--pale);          color: var(--mid); }
+.badge-green  { background: var(--green-light);  color: var(--green); }
+.badge-yellow { background: var(--yellow-light); color: #c08a00; }
+
+.section-divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+.roast-head {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--light);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.roast-list { display: flex; flex-direction: column; gap: 10px; }
+
+.roast-bubble {
+  background: var(--off);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 38px 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.55;
+  cursor: pointer;
+  transition: all 0.14s;
+  position: relative;
+}
+
+.roast-bubble:hover {
+  border-color: var(--orange-mid);
+  background: var(--orange-light);
+}
+
+.roast-bubble.picked {
+  border-color: var(--orange);
+  background: var(--orange-light);
+  box-shadow: 0 0 0 3px var(--orange-mid);
+}
+
+.pick-dot {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.14s;
+}
+
+.roast-bubble.picked .pick-dot { background: var(--orange); }
+
+.btn-again {
+  width: 100%;
+  margin-top: 12px;
+  background: none;
+  border: 1.5px dashed var(--border);
+  border-radius: 14px;
+  padding: 11px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--mid);
+  cursor: pointer;
+  transition: all 0.14s;
+}
+
+.btn-again:hover { background: var(--off); color: var(--text); border-color: #bbb; }
+
+.share-wrap { margin-top: 20px; display: flex; flex-direction: column; gap: 9px; }
+
+.share-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
+.btn-share {
+  border: none;
+  border-radius: 14px;
+  padding: 13px 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all 0.14s;
+}
+
+.btn-share:active { transform: scale(0.97); }
+.btn-x  { background: #000; color: #fff; }
+.btn-x:hover  { background: #222; }
+.btn-wa { background: #25D366; color: #fff; }
+.btn-wa:hover { background: #1ebe5d; }
+.btn-copy { background: var(--off); border: 1.5px solid var(--border); color: var(--text); }
+.btn-copy:hover { background: var(--pale); }
+
+.try-another {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.btn-try {
+  background: none;
+  border: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--mid);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.btn-try:hover { color: var(--text); }
+
+.toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text);
+  color: white;
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  z-index: 99;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+.footer {
+  text-align: center;
+  margin-top: 28px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--light);
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 400px) {
+  .share-row { grid-template-columns: 1fr; }
+  .weather-top { flex-direction: column; gap: 8px; }
+  .temp-block { text-align: left; }
+  .temp-num { font-size: 2.4rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="header">
+    <div class="logo">WeatherRoast <span>🔥</span></div>
+    <div class="sub">Your city's weather — brutally honest</div>
+  </div>
+
+  <div class="card">
+
+    <!-- INPUT -->
+    <div id="inputSection">
+      <div class="input-wrap">
+        <input class="city-field" id="cityField"
+          placeholder="Enter your city..."
+          onkeydown="if(event.key==='Enter') go()">
+        <button class="btn-go" onclick="go()">Roast it 🔥</button>
+      </div>
+
+      <div class="divider">or</div>
+
+      <button class="btn-loc" onclick="gps()">
+        📍 Use My Location
+      </button>
+
+      <div class="demo-row">
+        <div class="demo-label">Try a city →</div>
+        <div class="chip" onclick="quick('Mumbai')">Mumbai</div>
+        <div class="chip" onclick="quick('Delhi')">Delhi</div>
+        <div class="chip" onclick="quick('Bengaluru')">Bengaluru</div>
+        <div class="chip" onclick="quick('Pune')">Pune</div>
+        <div class="chip" onclick="quick('Chennai')">Chennai</div>
+        <div class="chip" onclick="quick('Prague')">Prague</div>
+      </div>
+
+      <div class="error" id="err"></div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading" id="loading">
+      <div class="dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <div class="loading-text">Reading the weather vibes...</div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result" id="result">
+      <div class="weather-top">
+        <div>
+          <div class="city-label" id="rCity">—</div>
+          <div class="city-sub"   id="rSub">—</div>
+        </div>
+        <div class="temp-block">
+          <div class="temp-num"  id="rTemp">—</div>
+          <div class="temp-cond" id="rCond">—</div>
+        </div>
+      </div>
+
+      <div class="stats"  id="rStats"></div>
+      <div class="badges" id="rBadges"></div>
+
+      <div class="section-divider"></div>
+
+      <div class="roast-head">🎤 Today's Roasts — tap one to share</div>
+      <div class="roast-list" id="rRoasts"></div>
+
+      <button class="btn-again" onclick="freshRoasts()">🔄 Different roasts</button>
+
+      <div class="share-wrap">
+        <div class="share-row">
+          <button class="btn-share btn-x"  onclick="toX()">𝕏 Post to X</button>
+          <button class="btn-share btn-wa" onclick="toWA()">💬 WhatsApp</button>
+        </div>
+        <button class="btn-share btn-copy" id="cpBtn" onclick="cp()">📋 Copy roast text</button>
+      </div>
+
+      <div class="try-another">
+        <button class="btn-try" onclick="reset()">← Try another city</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">no login &nbsp;·&nbsp; no ads &nbsp;·&nbsp; just weather pain</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DEMO DATA (instant, no API key) ───────────────────────────
+const DEMO = {
+  mumbai:    { city:'Mumbai',    country:'IN', temp:34, feels:41, cond:'Humid & Hazy',      hum:89, wind:14, vis:4  },
+  delhi:     { city:'Delhi',     country:'IN', temp:42, feels:47, cond:'Smoky Sunshine',     hum:22, wind:18, vis:3  },
+  bengaluru: { city:'Bengaluru', country:'IN', temp:27, feels:28, cond:'Partly Cloudy',      hum:62, wind:10, vis:10 },
+  bangalore: { city:'Bengaluru', country:'IN', temp:27, feels:28, cond:'Partly Cloudy',      hum:62, wind:10, vis:10 },
+  pune:      { city:'Pune',      country:'IN', temp:36, feels:39, cond:'Clear & Blazing',    hum:35, wind:12, vis:9  },
+  chennai:   { city:'Chennai',   country:'IN', temp:38, feels:44, cond:'Sunny & Steamy',     hum:78, wind:16, vis:7  },
+  hyderabad: { city:'Hyderabad', country:'IN', temp:37, feels:41, cond:'Hot & Sunny',        hum:40, wind:13, vis:8  },
+  kolkata:   { city:'Kolkata',   country:'IN', temp:35, feels:42, cond:'Muggy',              hum:82, wind:9,  vis:5  },
+  nanded:    { city:'Nanded',    country:'IN', temp:39, feels:43, cond:'Scorching Sun',      hum:28, wind:11, vis:10 },
+  prague:    { city:'Prague',    country:'CZ', temp:11, feels:8,  cond:'Overcast & Grey',    hum:74, wind:22, vis:14 },
+  london:    { city:'London',    country:'GB', temp:10, feels:7,  cond:'Drizzling',          hum:81, wind:25, vis:8  },
+  newyork:   { city:'New York',  country:'US', temp:18, feels:16, cond:'Partly Cloudy',      hum:55, wind:20, vis:12 },
+  dubai:     { city:'Dubai',     country:'AE', temp:41, feels:46, cond:'Hazy Sunshine',      hum:45, wind:15, vis:6  },
+};
+
+const ROAST_BANK = {
+  mumbai: [
+    "Mumbai humidity update: you don't sweat here, you marinate. Welcome to the soup.",
+    "34°C but feels 41°C in Mumbai. Even the sea breeze filed for leave today.",
+    "Mumbai weather report: your AC is now a prayer, not an appliance.",
+    "Humidity at 89%. Your clothes have feelings and they're uncomfortable too.",
+    "It's raining inside your shirt in Mumbai. Perfectly normal. Carry on.",
+    "Mumbai: where the rent takes one kidney and the humidity takes the other.",
+  ],
+  delhi: [
+    "Delhi: 42°C. The sun woke up and chose violence. Again. Still. Always.",
+    "Air quality and temperature are competing to ruin your day first. Both winning.",
+    "Feels like 47°C in Delhi. Even politicians are sweating — and they have 3 ACs.",
+    "Delhi weather advisory: your lungs would like a word with your life choices.",
+    "42°C in Delhi. The only thing hotter is the WhatsApp group before elections.",
+    "Delhi: AQI and ego in a daily competition for Most Toxic. Today: tie.",
+  ],
+  bengaluru: [
+    "Bengaluru changed its weather 3 times since you started reading this. Classic.",
+    "27°C in Bengaluru. Pleasantly confused. Like the traffic. Like the startups.",
+    "Carry a jacket, sunscreen, and an umbrella in Bengaluru. Weather has trust issues.",
+    "Bengaluru weather pivoted again. No notice. No severance. Just vibes.",
+    "It's 'nice' in Bengaluru today. Until it isn't. ETA: 11 minutes.",
+    "Bengaluru: the one city where your weather app files a bug report daily.",
+  ],
+  bangalore: [
+    "Bengaluru changed its weather 3 times since you started reading this. Classic.",
+    "27°C in Bengaluru. Pleasantly confused. Like the traffic. Like the startups.",
+    "Carry a jacket, sunscreen, and an umbrella in Bengaluru. Weather has trust issues.",
+    "Bengaluru weather pivoted again. No notice. No severance. Just vibes.",
+    "It's 'nice' in Bengaluru today. Until it isn't. ETA: 11 minutes.",
+  ],
+  pune: [
+    "Pune at 36°C. Retirees inside. IT crowd in traffic. Students on Zomato.",
+    "36°C in Pune but auto drivers still negotiating ₹20 extra. Priorities intact.",
+    "Pune weather: hotter than your 10th board result WhatsApp group. By a lot.",
+    "Feels 39°C in Pune. Sinhagad trek cancelled. God is also resting today.",
+    "Clear and blazing in Pune. The weather app was right. Nobody is ready anyway.",
+  ],
+  chennai: [
+    "Chennai: 38°C. Filter coffee temperature equals body temperature. Science has collapsed.",
+    "Humidity 78% in Chennai. The air isn't just thick — it has opinions.",
+    "38°C in Chennai. The sun didn't rise today. It arrived with a vendetta.",
+    "Chennai tip: hydrate, rehydrate, question your choices, hydrate again.",
+    "Feels 44°C in Chennai. Your shadow is sweating. It's also having second thoughts.",
+  ],
+  hyderabad: [
+    "37°C in Hyderabad. The biryani is spicy. The sun is spicier. Traffic is the final boss.",
+    "Hyderabad: nawabi attitude, startup energy, sun that answers to no one.",
+    "Feels 41°C in Hyderabad. Even the pearl market feels like a furnace today.",
+    "Hot and sunny in Hyderabad. The Charminar has stood 400 years. You'll survive today.",
+    "37°C in Hyderabad. Dil Raju is filming in this heat. What's your excuse?",
+  ],
+  kolkata: [
+    "Kolkata: 35°C, 82% humidity. Tagore wrote about this. He called it 'suffering beautifully'.",
+    "Feels 42°C in Kolkata. Even intellectuals at Coffee House have given up arguing.",
+    "Muggy in Kolkata. The rosogolla is sweating in solidarity.",
+    "Kolkata: your jhola bag now contains sweat. It didn't before. This is progress.",
+    "35°C in Kolkata. Trams running late. Humidity running ahead of schedule.",
+  ],
+  nanded: [
+    "Nanded: 39°C. The sun arrived before azan and has not left. Impressive commitment.",
+    "39°C in Nanded. Even the Godavari looks tired. Hydrate or be humbled.",
+    "Scorching sun in Nanded. God lives here. So does 39°C. Make peace with both.",
+    "Feels 43°C in Nanded. The heat is not a suggestion. It is a policy.",
+    "Nanded heat report: your chai has given up cooling. It respects the weather more than you.",
+  ],
+  prague: [
+    "Prague: 11°C and grey. The castle is brooding. The beer is perfect. Priorities correct.",
+    "Feels 8°C in Prague. T-shirt weather for locals. Tourists crying in four layers.",
+    "Overcast in Prague. Cobblestones wet. Man playing accordion. Everything technically fine.",
+    "11°C in Prague. Cold enough to justify the third beer. This is thermoregulation.",
+    "Prague: beautiful, gloomy, atmospheric, and 3°C colder than your optimism predicted.",
+  ],
+  london: [
+    "London: 10°C and drizzling. The weather app said 'partly cloudy'. The app lied. Again.",
+    "Drizzling in London. Not raining, not sunny — just the city's default grey setting.",
+    "10°C in London. Feels 7°C. The sun filed a leave application and it was approved.",
+    "London weather report: damp. As always. Forever. This is just the texture of life here.",
+    "Humidity 81% in London. It's not raining, the air is just crying softly.",
+  ],
+  newyork: [
+    "New York: 18°C. Partly cloudy. The weather, like rent, is currently tolerable.",
+    "Partly cloudy in NYC. The city that never sleeps also never has consistent weather.",
+    "18°C in New York. Finally acceptable. The subway is still 35°C. Balance achieved.",
+    "New York weather: fine today. Tomorrow: your problem. Live in the moment.",
+    "Feels 16°C in New York. Enough to survive. Not enough to stop complaining. Perfect.",
+  ],
+  dubai: [
+    "Dubai: 41°C. Even the mall's outdoor entrance is a health hazard today.",
+    "Feels 46°C in Dubai. The asphalt is reconsidering its career choices.",
+    "41°C in Dubai. AC is not a luxury here. It is oxygen. It is God.",
+    "Hazy sunshine in Dubai. The sun is present but make it fashion.",
+    "Dubai weather report: hot, hazy, and the Ferraris are still out. Respect.",
+  ],
+};
+
+function genericRoasts(city, temp, feels, cond, hum) {
+  const hot = temp >= 38, cold = temp <= 10;
+  if (hot) return shuffle([
+    `${city}: ${temp}°C. The sun woke up and chose violence today.`,
+    `${temp}°C in ${city}, feels ${feels}°C. Hydrate or evaporate. Not a suggestion.`,
+    `${cond} in ${city}. Your sunscreen needs its own sunscreen.`,
+    `${city} heat advisory: the temperature has crossed the 'why do I live here' line.`,
+    `${temp}°C in ${city}. Even the birds are doing ground level only today.`,
+  ]).slice(0,3);
+  if (cold) return shuffle([
+    `${city}: ${temp}°C. The cold is not just in the air. It's personal.`,
+    `${temp}°C in ${city}. Feels ${feels}°C. Your will to leave the house: offline.`,
+    `${cond} in ${city}. Even the pigeons look judgemental about this weather.`,
+    `${temp}°C in ${city}. Heating bill about to hit a new personality trait.`,
+    `${city} cold report: layering is not optional. It's survival strategy.`,
+  ]).slice(0,3);
+  return shuffle([
+    `${city}: ${temp}°C. ${cond}. The weather exists today. More than can be said for motivation.`,
+    `${temp}°C in ${city}, feels ${feels}°C. Wind ${hum > 70 ? 'and humidity' : ''} both present. Carrying on.`,
+    `${city} weather: ${cond}. ${hum}% humidity. You will be fine. Probably.`,
+    `${temp}°C in ${city}. Not hot, not cold — the weather equivalent of a shrug emoji.`,
+  ]).slice(0,3);
+}
+
+// ── STATE ──────────────────────────────────────────────────
+let cur = null;
+let picked = '';
+
+// ── ACTIONS ───────────────────────────────────────────────
+function quick(city) {
+  document.getElementById('cityField').value = city;
+  go();
+}
+
+async function go() {
+  const raw = document.getElementById('cityField').value.trim();
+  if (!raw) { showErr("Type a city name first."); return; }
+  clearErr();
+  showLoading(true);
+  await loadCity(raw);
+}
+
+async function gps() {
+  if (!navigator.geolocation) { showErr("GPS not available. Enter city manually."); return; }
+  clearErr();
+  showLoading(true);
+  navigator.geolocation.getCurrentPosition(
+    async pos => {
+      try {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+        const d = await r.json();
+        const city = d.address?.city || d.address?.town || d.address?.village || d.address?.county || '';
+        if (!city) throw new Error("City not found");
+        document.getElementById('cityField').value = city;
+        await loadCity(city);
+      } catch {
+        showLoading(false);
+        showErr("Couldn't detect city. Enter manually.");
+      }
+    },
+    () => { showLoading(false); showErr("Location denied. Enter city manually."); }
+  );
+}
+
+async function loadCity(cityRaw) {
+  const key = cityRaw.toLowerCase().replace(/[\s\-]/g,'');
+  const demoKey = Object.keys(DEMO).find(k => key.includes(k) || k.includes(key));
+
+  if (demoKey) {
+    cur = { ...DEMO[demoKey], key: demoKey };
+    render(); freshRoasts(); showResult();
+    return;
+  }
+
+  // Live weather via wttr.in (free, no API key)
+  try {
+    const r = await fetch(`https://wttr.in/${encodeURIComponent(cityRaw)}?format=j1`);
+    if (!r.ok) throw new Error('not found');
+    const d = await r.json();
+    const w    = d.current_condition?.[0];
+    const area = d.nearest_area?.[0];
+    const cityName = area?.areaName?.[0]?.value || cityRaw;
+    const country  = area?.country?.[0]?.value || '';
+    cur = {
+      city: cityName, country,
+      temp:  parseInt(w.temp_C),
+      feels: parseInt(w.FeelsLikeC),
+      cond:  w.weatherDesc?.[0]?.value || 'Unknown',
+      hum:   parseInt(w.humidity),
+      wind:  parseInt(w.windspeedKmph),
+      vis:   parseInt(w.visibility),
+      key:   cityName.toLowerCase().replace(/\s/g,''),
+    };
+    render(); freshRoasts(); showResult();
+  } catch {
+    showLoading(false);
+    showErr(`Couldn't find "${cityRaw}". Try: Mumbai, Delhi, Bengaluru, Pune, London, Dubai.`);
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function render() {
+  const { city, country, temp, feels, cond, hum, wind, vis } = cur;
+  document.getElementById('rCity').textContent = city;
+  document.getElementById('rSub').textContent  = country || 'Live';
+  document.getElementById('rTemp').textContent = `${temp}°C`;
+  document.getElementById('rCond').textContent = cond;
+
+  document.getElementById('rStats').innerHTML = [
+    `💧 ${hum}% humidity`,
+    `🌬 ${wind} km/h wind`,
+    `🌡 Feels ${feels}°C`,
+    `👁 ${vis} km vis`,
+  ].map(s => `<div class="stat-pill">${s}</div>`).join('');
+
+  const badges = makeBadges(temp, hum, wind, cond);
+  document.getElementById('rBadges').innerHTML = badges
+    .map(b => `<span class="badge ${b.cls}">${b.text}</span>`).join('');
+}
+
+function makeBadges(temp, hum, wind, cond) {
+  const b = []; const c = cond.toLowerCase();
+  if      (temp >= 40) b.push({ text:'🔥 Melting Mode',    cls:'badge-hot'    });
+  else if (temp >= 35) b.push({ text:'☀️ Sweat Festival',  cls:'badge-hot'    });
+  else if (temp >= 28) b.push({ text:'😅 Warm Zone',       cls:'badge-yellow' });
+  else if (temp <= 5)  b.push({ text:'🧊 Freeze Mode',     cls:'badge-humid'  });
+  else if (temp <= 15) b.push({ text:'🧥 Jacket Weather',  cls:'badge-humid'  });
+  else                 b.push({ text:'✅ Actually Nice',   cls:'badge-green'  });
+  if (hum >= 80)             b.push({ text:'💦 Soup Air',          cls:'badge-humid' });
+  if (wind >= 35)            b.push({ text:'🌪 Hair Chaos',         cls:'badge-wind'  });
+  if (c.includes('rain'))    b.push({ text:'☔ Umbrella Olympics',  cls:'badge-humid' });
+  if (c.includes('thunder')) b.push({ text:'⚡ Zeus Mode',          cls:'badge-hot'   });
+  if (c.includes('snow'))    b.push({ text:'❄️ Winter Royale',      cls:'badge-humid' });
+  return b.slice(0, 3);
+}
+
+function freshRoasts() {
+  if (!cur) return;
+  const { key, city, temp, feels, cond, hum } = cur;
+  const bank = ROAST_BANK[key]
+    || ROAST_BANK[Object.keys(ROAST_BANK).find(k => key.includes(k) || k.includes(key))];
+  const pool = bank
+    ? shuffle([...bank]).slice(0, 3)
+    : genericRoasts(city, temp, feels, cond, hum);
+
+  const container = document.getElementById('rRoasts');
+  container.innerHTML = pool.map(r => `
+    <div class="roast-bubble" onclick="pick(this,'${esc(r)}')">
+      <div class="pick-dot"></div>
+      ${r}
+    </div>
+  `).join('');
+
+  const first = container.querySelector('.roast-bubble');
+  if (first) first.click();
+}
+
+function pick(el, text) {
+  document.querySelectorAll('.roast-bubble').forEach(b => b.classList.remove('picked'));
+  el.classList.add('picked');
+  picked = text;
+}
+
+// ── SHARE ─────────────────────────────────────────────────
+function shareText() {
+  if (!cur || !picked) return '';
+  return `🌡️ ${cur.city} Weather\n${cur.temp}°C · ${cur.cond}\n\n"${picked}"\n\nvia WeatherRoast 🔥 weatherroast.app`;
+}
+
+function toX()  { if (!picked) { toast("Tap a roast first!"); return; } window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(shareText()),'_blank'); }
+function toWA() { if (!picked) { toast("Tap a roast first!"); return; } window.open('https://wa.me/?text='+encodeURIComponent(shareText()),'_blank'); }
+
+async function cp() {
+  if (!picked) { toast("Tap a roast first!"); return; }
+  try {
+    await navigator.clipboard.writeText(shareText());
+    toast("Copied! Go spread the pain 🔥");
+    const b = document.getElementById('cpBtn');
+    b.textContent = '✅ Copied!';
+    setTimeout(()=>{ b.textContent='📋 Copy roast text'; }, 2000);
+  } catch { toast("Couldn't copy — try manually."); }
+}
+
+// ── UI ────────────────────────────────────────────────────
+function showLoading(on) {
+  document.getElementById('loading').classList.toggle('show', on);
+  document.getElementById('result').classList.remove('show');
+}
+
+function showResult() {
+  document.getElementById('loading').classList.remove('show');
+  document.getElementById('result').classList.add('show');
+}
+
+function reset() {
+  cur = null; picked = '';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('cityField').value = '';
+  document.getElementById('cityField').focus();
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function clearErr() { document.getElementById('err').classList.remove('show'); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function shuffle(a) {
+  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function esc(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+// URL param pre-load
+(function(){
+  const c = new URLSearchParams(location.search).get('city');
+  if (c) { document.getElementById('cityField').value=c; setTimeout(go,250); }
+})();
+</script>
+</body>
+</html>
